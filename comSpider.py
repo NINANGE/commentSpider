@@ -12,7 +12,6 @@ import requests
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.common.exceptions import UnexpectedAlertPresentException
-from connectSQL import getAll_Data,getAllCustomItemDetailData
 from pyquery import PyQuery as pq
 import pymongo
 from lxml import etree
