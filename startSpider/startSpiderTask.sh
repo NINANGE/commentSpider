@@ -2,7 +2,7 @@
 export PATH=$PATH:/usr/local/bin
 
 #进入.py脚本所在目录
-cd /home/django/nange/commentSpider/commentPrint
+cd /home/django/nange/commentSpider
 #cd /Users/zhuoqin/commentSpider
 currentTime=$(date -d 'now' +%Y%m%d)
 
