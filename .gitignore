@@ -1,0 +1,12 @@
+otherFile/
+ceShi.py
+ceShi2.py
+commentPrint/
+picDic/
+screenshot/
+*.log
+*.html
+.idea/
+*.pyc
+*.csv
+connectSQL.py
