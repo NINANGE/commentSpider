@@ -287,6 +287,7 @@ def provideSource(html,itemData,data):
 """
 def JudgeLoginSuccess(driver):
     while True:
+        time.sleep(2)
         if loginBtnExistence(driver) == True:
             print '还未登录'
             driver.find_element_by_xpath('//*[@id="login-info"]/a[1]').click()
