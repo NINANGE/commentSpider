@@ -31,7 +31,9 @@ sys.setdefaultencoding('utf-8')
 #验证接口
 url = 'https://v2-api.jsdama.com/upload'
 
-allCategory = pd.read_csv('otherFile/taoBaoCategory.csv')
+# allCategory = pd.read_csv('otherFile/taoBaoCategory.csv')
+
+allCategory = pd.read_csv('/home/django/nange/commentSpider/otherFile/taoBaoCategory.csv')
 
 # categoryUrl = 'https://detail.tmall.com/item.htm?id=17731025119'
 
@@ -428,7 +430,8 @@ def tmallLogin(driver):
         driver.find_element_by_name("TPL_password").clear()
         driver.find_element_by_name("TPL_password").send_keys("248552ZZN")
         time.sleep(random.uniform(3, 4))
-        driver.save_screenshot('screenshot/login.png')
+        # driver.save_screenshot('screenshot/login.png') #测试
+        driver.save_screenshot('/home/django/nange/commentSpider/screenshot/login.png')
         #
         # TODO:XDF:3
         # driver.save_screenshot('RecordProcess/process3.png')
