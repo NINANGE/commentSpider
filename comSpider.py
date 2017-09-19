@@ -126,7 +126,7 @@ def commentSpider():
                 except Exception as e:
                     print 'driver get error---%s'%e
                     continue
-                
+
 
                 #这里判断淘宝还是天猫，如果是淘宝，直接略过
                 if ('item.taobao.com' in driver.current_url):# or (judgeProduct(driver) == True):
