@@ -118,10 +118,15 @@ def commentSpider():
                 sys.setdefaultencoding('utf-8')
 
                 time.sleep(random.uniform(3,6))
-                driver.get('https://detail.tmall.com/item.htm?id=%s' % str(itemData['TreasureID']))
-                tmallLogin(driver)
-                time.sleep(random.uniform(3, 5))
-                tmallCode(driver,wait)
+                try:
+                    driver.get('https://detail.tmall.com/item.htm?id=%s' % str(itemData['TreasureID']))
+                    tmallLogin(driver)
+                    time.sleep(random.uniform(3, 5))
+                    tmallCode(driver, wait)
+                except Exception as e:
+                    print 'driver get error---%s'%e
+                    continue
+                
 
                 #这里判断淘宝还是天猫，如果是淘宝，直接略过
                 if ('item.taobao.com' in driver.current_url):# or (judgeProduct(driver) == True):
