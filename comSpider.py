@@ -268,7 +268,12 @@ def provideSource(html,itemData,data):
         print brand, brandId, categoryId, rootCatId, spuId, title, shopID, StyleName, shopName, itemId, categoryName, EvaluationScores, URL_NO, lastPage
         for page in range(1, lastPage + 1):
             print '第%s次' % page
-            CommentData = commentContent(str(itemId), str(spuId), str(sellerId), str(page))["rateDetail"]["rateList"]
+
+            if commentContent(str(itemId), str(spuId), str(sellerId), str(page)):
+
+                CommentData = commentContent(str(itemId), str(spuId), str(sellerId), str(page))["rateDetail"]["rateList"]
+            else:
+                continue
 
             # 获取所有评论内容并保存到mongodb
             getAllCommentData(CommentData, str(data['ItemID']), shopName, str(itemId), title, TreasureLink,
@@ -666,6 +671,7 @@ def getLastPage(itemId,spuId,sellerId):
 
 #TODO:XDF 数据源抽取
 def getCommentResults(commentURL,getNO):
+    i = 0
     while True:
         if getNO == 'comResult':
             time.sleep(random.randint(4,10)) #这里是间隔请求时间随机数，避免被认为是程序执行
@@ -701,7 +707,12 @@ def getCommentResults(commentURL,getNO):
 
         if 'https://sec.taobao.com/' in commentData:
             # commentLogin(result)
+            print 'enter----login'
             time.sleep(random.uniform(3,6))
+            if i==20:
+                commentResult = {}
+                break
+            i += 1
         else:
             commentResult = json.loads(commentData)
             break
