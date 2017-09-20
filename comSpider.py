@@ -427,9 +427,11 @@ def tmallLogin(driver):
         # driver.save_screenshot('RecordProcess/process2.png')
         driver.find_element_by_name("TPL_username").clear()
         driver.find_element_by_name("TPL_username").send_keys("13672456277")
+        driver.save_screenshot('/home/django/nange/commentSpider/screenshot/loginUsername.png')
         time.sleep(random.uniform(3, 4))
         driver.find_element_by_name("TPL_password").clear()
         driver.find_element_by_name("TPL_password").send_keys("248552ZZN")
+        driver.save_screenshot('/home/django/nange/commentSpider/screenshot/loginPassword.png')
         time.sleep(random.uniform(3, 4))
         # driver.save_screenshot('screenshot/login.png') #测试
         driver.save_screenshot('/home/django/nange/commentSpider/screenshot/login.png')
