@@ -109,9 +109,9 @@ def commentSpider():
         for data in projectData:
             print '-----', data['ItemID'], projectData.count()
             updateProjectTBState(data['ItemID'], 'underWay')
-            projectDetailData = tableProjectDetail.find({'ItemID': data['ItemID']})
+            projectDetailData = tableProjectDetail.find({'ItemID': str(data['ItemID'])})
             for itemData in projectDetailData:
-                print itemData['ItemID']
+                # print itemData['ItemID']
                 """
                     由于下面改变了编码格式为gbk，所以这里要重置编码为utf-8格式，否则第二次开始很多会变成乱码，例如 styleName参数
                 """
@@ -420,7 +420,10 @@ def tmallLogin(driver):
         # TODO:XDF:1 因为无头浏览器是无界面的，所以只能通过截图来查看过程，下面同理（仅仅针对phantomjs无头浏览器，其它会报错）
         # driver.save_screenshot('RecordProcess/process1.png')
 
-        driver.find_element_by_xpath('//*[@id="J_Quick2Static"]').click()
+        if judgeHaveLogin(driver) == True:
+            driver.find_element_by_xpath('//*[@id="J_Quick2Static"]').click()
+        else:
+            print '----NO_Click----'
 
         time.sleep(2)
         # TODO:XDF:2
@@ -445,6 +448,20 @@ def tmallLogin(driver):
         print ('login success')
         # driver.save_screenshot('RecordProcess/process5.png')
         time.sleep(2)
+
+#判断是否包含‘密码登录’字样，如果有需要执行点击，反之不需要
+def judgeHaveLogin(driver):
+    try:
+        if driver.find_element_by_xpath('//*[@id="J_QRCodeLogin"]/div[@class="login-links"]/a[@class="forget-pwd J_Quick2Static"]').text:
+            a = True
+            print '内容---%s' % driver.find_element_by_xpath('//*[@id="J_QRCodeLogin"]/div[@class="login-links"]/a[@class="forget-pwd J_Quick2Static"]').text
+        else:
+            print '内容2---%s' % driver.find_element_by_xpath('//*[@id="J_QRCodeLogin"]/div[@class="login-links"]/a[@class="forget-pwd J_Quick2Static"]').text
+            a = False
+    except Exception as e:
+        print 'loginError ---%s'%e
+        a = False
+    return a
 
 #TODO:XDF 验证码验证（通过打码平台）
 def tmallCode(driver,wait):
