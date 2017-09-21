@@ -223,7 +223,8 @@ def provideSource(html,itemData,data):
         brand = brandName(brandData)
 
         # 类目
-        categoryName = categoryNames(categoryId)
+        # categoryName = categoryNames(categoryId)
+        categoryName = categoryNamesQly(str(itemId))
 
         # 评价描述评分
         EvaluationScores = evaluationScoreURL(str(itemId), str(spuId), str(sellerId))
@@ -276,8 +277,7 @@ def provideSource(html,itemData,data):
                 continue
 
             # 获取所有评论内容并保存到mongodb
-            getAllCommentData(CommentData, str(data['ItemID']), shopName, str(itemId), title, TreasureLink,
-                              categoryName, str(itemData['ItemName']), EvaluationScores, data['ItemID'])
+            getAllCommentData(CommentData, str(data['ItemID']), shopName, str(itemId), title, TreasureLink,categoryName, str(itemData['ItemName']), EvaluationScores, data['ItemID'])
 
             time.sleep(random.randint(3,5))
 
@@ -391,7 +391,7 @@ def styleNames(styleData):
             StyleName = '-'
     return StyleName
 
-#类目
+#TODO:XDF 这里是匹配类目ID获取类目
 def categoryNames(categoryId):
     for k in range(0, len(allCategory)):
         if str(allCategory['CategoryId'][k]) == categoryId:
@@ -399,6 +399,30 @@ def categoryNames(categoryId):
             break
         else:
             categoryName = '-'
+    return categoryName
+
+#通过请求获取类目
+def categoryNamesQly(TreasureID):
+    url = 'http://plugin.qly360.com/productDetailList.do?spid='+TreasureID
+
+    req = urllib2.Request(url)
+    res_data = urllib2.urlopen(req)
+    res = res_data.read()
+
+    babyCategoryInfo = json.loads(res)
+    print babyCategoryInfo
+    for data in babyCategoryInfo:
+        if '-' in data['category']:
+            # 类目
+            category = data['category'].encode("utf-8")
+            categoryName = category.split('-')[-1]
+
+        else:
+            categoryName = '-'
+
+        # time_local = data['delist'] / 1000
+        # time_local = time.localtime(time_local)
+        # offTime = time.strftime("%Y-%m-%d %H:%M:%S", time_local) #这是产品下架时间，暂且忽略
     return categoryName
 
 #品牌
