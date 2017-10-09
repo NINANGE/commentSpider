@@ -849,7 +849,7 @@ def settingNameCode(itemName):
     mychar = chardet.detect(itemName)
     nameCode = mychar['encoding']
     nameLanguage = mychar['language']
-    if nameCode == 'KOI8-R' or nameLanguage== 'Russian' or nameCode == 'ISO-8859-1' or nameCode == 'ISO-8859-7' or nameLanguage== 'Thai' or nameLanguage=='Bulgarian' or nameLanguage=='Bulgairan' or nameCode==None:
+    if nameCode == 'KOI8-R' or nameLanguage== 'Russian' or nameCode == 'ISO-8859-1' or nameCode == 'ISO-8859-7' or nameLanguage== 'Thai' or nameLanguage=='Bulgarian' or nameLanguage=='Bulgairan' or nameLanguage=='Hebrew' or nameCode==None:
         Name = itemName.decode('gb18030').encode('utf-8')
     elif nameCode == 'utf-8' or nameCode == 'UTF-8':
         Name = itemName.decode('utf-8', 'ignore').encode('utf-8')
