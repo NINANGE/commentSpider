@@ -1049,7 +1049,6 @@ def getAllCommentData(CommentData,commentItemID,shopName,TreasureID,title,Treasu
             'EvaluationScores':EvaluationScores,
             'ItemID':ItemID
         }
-        print allCommentContent
         saveCommentContent(allCommentContent)
 
 #评论图片处理
