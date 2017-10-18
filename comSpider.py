@@ -269,7 +269,7 @@ def provideSource(html,itemData,data):
 
         # SaveDetailContent(detailContent)
 
-        updateCustomItemDetailTB(itemData['ItemID'],str(itemData['ItemName']),detailContent,'HaveInHand')
+        updateCustomItemDetailTB(itemData['ItemID'],detailContent,'HaveInHand')
 
         lastPage = getLastPage(str(itemId), str(spuId), str(sellerId))
 
@@ -285,7 +285,7 @@ def provideSource(html,itemData,data):
             time.sleep(random.randint(3,5))
 
         print brand, brandId, categoryId, rootCatId, spuId, title, shopID, StyleName, shopName, itemId, categoryName, EvaluationScores, URL_NO, lastPage
-        updateCustomItemDetailTB(itemData['ItemID'],str(itemData['ItemName']),detailContent, 'productEnd')
+        updateCustomItemDetailTB(itemData['ItemID'],detailContent, 'productEnd')
     except Exception as e:
         print ('errorMISS---%s' % e)
 
@@ -580,7 +580,7 @@ def productExist(ItemID,ItemName,TreasureID,Treasure_Status,InsertDate):
         print 'update error---%s'%e
 
 #更新详情表
-def updateCustomItemDetailTB(ItemID,ItemName,detailContent,state):
+def updateCustomItemDetailTB(ItemID,detailContent,state):
     print '详细内容---%s'%detailContent['TreasureName'], detailContent['TreasureLink'], detailContent['ShopName'],ItemID,detailContent['TreasureID']#, rootCatId, spuId, title, shopID, StyleName, shopName, itemId, categoryName, EvaluationScores, URL_NO, lastPage
     try:
         if state == 'HaveInHand':
@@ -588,7 +588,7 @@ def updateCustomItemDetailTB(ItemID,ItemName,detailContent,state):
         else:
             Treasure_Status = '1'
 
-        if tableProjectDetail.update({'ItemID':ItemID,"ItemName":ItemName,'TreasureID':detailContent['TreasureID']},{'$set':{'TreasureName':detailContent['TreasureName'],'TreasureLink':detailContent['TreasureLink'],
+        if tableProjectDetail.update({'ItemID':ItemID,"ItemName":detailContent['ItemName'],'TreasureID':detailContent['TreasureID']},{'$set':{'TreasureName':detailContent['TreasureName'],'TreasureLink':detailContent['TreasureLink'],
                                                                                 'ShopName':detailContent['ShopName'],'Category_Name':detailContent['Category_Name'],'spuId':detailContent['spuId'],
                                                                                   'EvaluationScores':detailContent['EvaluationScores'],'ShopURL':detailContent['ShopURL'],
                                                                                   'Url_No':detailContent['Url_No'],'CategoryId':detailContent['CategoryId'],'brandId':detailContent['brandId'],
@@ -822,6 +822,7 @@ def save_img(imgURL,filename):
 
 #评价描述评分
 def evaluationScoreURL(itemId,spuId,sellerId):
+    print '进入评价描述评分'
     evaluationScoresURL = 'https://dsr-rate.tmall.com/list_dsr_info.htm?itemId=' + str(itemId) + '&spuId=' + str(spuId) + '&sellerId=' + str(sellerId)
 
     request = urllib2.Request(url=evaluationScoresURL, headers=headers)
