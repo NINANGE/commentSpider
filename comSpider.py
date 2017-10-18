@@ -8,7 +8,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 import time
 import datetime
-import requests
+# import requests
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.common.exceptions import UnexpectedAlertPresentException
@@ -53,9 +53,9 @@ headers = {'UserAgent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_5) AppleWe
 def commentSpider():
 
     # TODO:XDF Chrome欲歌浏览器
-    # options = webdriver.ChromeOptions()
-    #
-    # # 设置中文
+    options = webdriver.ChromeOptions()
+
+    # 设置中文
     # options.add_argument('lang=zh_CN.UTF-8')#'lang=zh_CN.UTF-8',--proxy-server=http://220.166.242.8:8118
     # prefs = {"profile.managed_default_content_settings.images": 2}
     # options.add_experimental_option("prefs", prefs)  # TODO:XDF 禁止加载图片
@@ -433,90 +433,90 @@ def GetIPData():
     return IPAddressPortList
 
 # 获取淘宝评论内容数据源
-def getTaoBaoCommentData(TreasureID,sellerId,page):
-    i = 0
-    while True:
-        time.sleep(random.uniform(8, 20))
-        RequstURL = 'https://rate.taobao.com/feedRateList.htm?auctionNumId=' + str(TreasureID) + '&userNumId=' + str(sellerId) + '&currentPageNum=' + str(page) + '&pageSize=20&rateType=&orderType=feedbackdate&attribute=&hasSku=false&folded=0'
-        print RequstURL
-
-        BuildingDetailHTML = requests.get(RequstURL)
-        BuildingDetailHTML.encoding = 'gbk'
-        print BuildingDetailHTML.text
-        if 'https://sec.taobao.com/' in BuildingDetailHTML.text:
-            print 'enter----login'
-            time.sleep(random.uniform(4, 6))
-            if i == 40:
-                taoBaoCommentResult = {}
-                break
-            i += 1
-            time.sleep(random.uniform(8, 20))
-        else:
-            requestResponse = '\((.*?)\)'
-            shopIdData = re.findall(requestResponse, BuildingDetailHTML.text, re.S)[0]
-            taoBaoCommentResult = json.loads(shopIdData)
-            break
-    return taoBaoCommentResult
+# def getTaoBaoCommentData(TreasureID,sellerId,page):
+#     i = 0
+#     while True:
+#         time.sleep(random.uniform(8, 20))
+#         RequstURL = 'https://rate.taobao.com/feedRateList.htm?auctionNumId=' + str(TreasureID) + '&userNumId=' + str(sellerId) + '&currentPageNum=' + str(page) + '&pageSize=20&rateType=&orderType=feedbackdate&attribute=&hasSku=false&folded=0'
+#         print RequstURL
+#
+#         BuildingDetailHTML = requests.get(RequstURL)
+#         BuildingDetailHTML.encoding = 'gbk'
+#         print BuildingDetailHTML.text
+#         if 'https://sec.taobao.com/' in BuildingDetailHTML.text:
+#             print 'enter----login'
+#             time.sleep(random.uniform(4, 6))
+#             if i == 40:
+#                 taoBaoCommentResult = {}
+#                 break
+#             i += 1
+#             time.sleep(random.uniform(8, 20))
+#         else:
+#             requestResponse = '\((.*?)\)'
+#             shopIdData = re.findall(requestResponse, BuildingDetailHTML.text, re.S)[0]
+#             taoBaoCommentResult = json.loads(shopIdData)
+#             break
+#     return taoBaoCommentResult
 
 #获取所有淘宝评论内容并保存到mongodb
-def getTaoBaoCommentAndSaveMongo(commentResult,TreasureID,Title,TreasureLink,shopName,categoryName,ItemName, EvaluationScores, ItemID):
-    # print commentResult['total'], len(commentResult['comments'])
-    mychar = chardet.detect(ItemName)
-    print '编码格式---%s' % mychar
-    commentResponse = commentResult['comments']
-    for i in range(0, len(commentResponse)):
-        content = commentResponse[i]['content']
-        displayUserNick = commentResponse[i]['user']['nick']
-        TreasureName = commentResponse[i]['auction']['title']
-        auctionSku = commentResponse[i]['auction']['sku']
-        # RateDate = str(commentResponse[i]['date'])
-        RateDate = strToDateTime(str(commentResponse[i]['date']), 'fiveAllWordTypes')
-
-        if HaveOrNoAppend(commentResponse[i]) == True:
-            IsAppend = 1
-            appendContent = commentResponse[i]['append']['content']  # 追加内容
-            dayAfterConfirm = commentResponse[i]['append']['dayAfterConfirm']  # 相隔多少天追加
-            AppendImgURL = taoBaoAppendPhotos(commentResponse[i]['append']['photos'])
-            appendCommentTime = ''
-        else:
-            IsAppend = 0
-            appendContent = '-'  # 追加内容
-            dayAfterConfirm = '-'  # 相隔多少天追加
-            AppendImgURL = '-'
-            appendCommentTime = ''
-
-        if commentResponse[i]['photos']:
-            ImgServiceURL = taoBaoAppendPhotos(commentResponse[i]['photos'])
-        else:
-            ImgServiceURL = '-'
-
-        allCommentContent = {
-            # 'itemID': commentItemID,
-            'TreasureID': TreasureID,
-            'TreasureName': Title,
-            'displayUserNick': displayUserNick,
-            'rateContent': content,
-            # 'sellerId': sellerId,
-            'auctionSku': auctionSku,
-            # 'cmsSource': cmsSource,
-            'ImgServiceURL': ImgServiceURL,
-            'RateDate': RateDate,
-            'IsAppend': IsAppend,
-            'appendCommentTime': appendCommentTime,
-            'appendContent': appendContent,
-            'appendDifferDays': dayAfterConfirm,
-            'appendPics': AppendImgURL,
-            'ShopName': shopName,
-            'Category_Name': settingNameCode(categoryName),
-            'TreasureLink': TreasureLink,
-            'ItemName': settingNameCode(ItemName),
-            'EvaluationScores': EvaluationScores,
-            'ItemID': ItemID
-        }
-
-        saveCommentContent(allCommentContent)
-
-        print content, displayUserNick, TreasureName, auctionSku, RateDate, appendContent, dayAfterConfirm, AppendImgURL, IsAppend
+# def getTaoBaoCommentAndSaveMongo(commentResult,TreasureID,Title,TreasureLink,shopName,categoryName,ItemName, EvaluationScores, ItemID):
+#     # print commentResult['total'], len(commentResult['comments'])
+#     mychar = chardet.detect(ItemName)
+#     print '编码格式---%s' % mychar
+#     commentResponse = commentResult['comments']
+#     for i in range(0, len(commentResponse)):
+#         content = commentResponse[i]['content']
+#         displayUserNick = commentResponse[i]['user']['nick']
+#         TreasureName = commentResponse[i]['auction']['title']
+#         auctionSku = commentResponse[i]['auction']['sku']
+#         # RateDate = str(commentResponse[i]['date'])
+#         RateDate = strToDateTime(str(commentResponse[i]['date']), 'fiveAllWordTypes')
+#
+#         if HaveOrNoAppend(commentResponse[i]) == True:
+#             IsAppend = 1
+#             appendContent = commentResponse[i]['append']['content']  # 追加内容
+#             dayAfterConfirm = commentResponse[i]['append']['dayAfterConfirm']  # 相隔多少天追加
+#             AppendImgURL = taoBaoAppendPhotos(commentResponse[i]['append']['photos'])
+#             appendCommentTime = ''
+#         else:
+#             IsAppend = 0
+#             appendContent = '-'  # 追加内容
+#             dayAfterConfirm = '-'  # 相隔多少天追加
+#             AppendImgURL = '-'
+#             appendCommentTime = ''
+#
+#         if commentResponse[i]['photos']:
+#             ImgServiceURL = taoBaoAppendPhotos(commentResponse[i]['photos'])
+#         else:
+#             ImgServiceURL = '-'
+#
+#         allCommentContent = {
+#             # 'itemID': commentItemID,
+#             'TreasureID': TreasureID,
+#             'TreasureName': Title,
+#             'displayUserNick': displayUserNick,
+#             'rateContent': content,
+#             # 'sellerId': sellerId,
+#             'auctionSku': auctionSku,
+#             # 'cmsSource': cmsSource,
+#             'ImgServiceURL': ImgServiceURL,
+#             'RateDate': RateDate,
+#             'IsAppend': IsAppend,
+#             'appendCommentTime': appendCommentTime,
+#             'appendContent': appendContent,
+#             'appendDifferDays': dayAfterConfirm,
+#             'appendPics': AppendImgURL,
+#             'ShopName': shopName,
+#             'Category_Name': settingNameCode(categoryName),
+#             'TreasureLink': TreasureLink,
+#             'ItemName': settingNameCode(ItemName),
+#             'EvaluationScores': EvaluationScores,
+#             'ItemID': ItemID
+#         }
+#
+#         saveCommentContent(allCommentContent)
+#
+#         print content, displayUserNick, TreasureName, auctionSku, RateDate, appendContent, dayAfterConfirm, AppendImgURL, IsAppend
 
 #淘宝追加图片
 def taoBaoAppendPhotos(AppendPics):
