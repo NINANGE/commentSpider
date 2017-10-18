@@ -158,7 +158,7 @@ def commentSpider():
                     print '显性未加载成功---%s' % e
 
                 #判断是否已登录
-                # JudgeLoginSuccess(driver)
+                JudgeLoginSuccess(driver)
                 time.sleep(random.uniform(3,5))
                 html = driver.page_source
                 # print html
@@ -225,14 +225,13 @@ def provideSource(html,itemData,data):
         brand = brandName(brandData)
 
         # 类目
-        # categoryName = categoryNames(categoryId)
         categoryName = categoryNamesQly(str(itemId))
 
         # 评价描述评分
         EvaluationScores = evaluationScoreURL(str(itemId), str(spuId), str(sellerId))
         print '数据源----***----',itemData['ItemID'],itemId,title,TreasureLink,shopName,categoryName,spuId,EvaluationScores,ShopURL,URL_NO,categoryId,brandId,brand,rootCatId,StyleName,str(itemData['ItemName']),shopID
         detailContent = {
-            'ItemID': str(itemId),
+            'ItemID': str(itemData['ItemID']),
             'TreasureID': itemId,
             'TreasureName': title,
             'TreasureLink': TreasureLink,
@@ -245,10 +244,10 @@ def provideSource(html,itemData,data):
             'Category_Name': categoryName,
             'GrpName': '',
             'spuId': spuId,
-            'EvaluationScores': EvaluationScores,
+            'EvaluationScores': str(EvaluationScores),
             'ShopURL': ShopURL,
             'TreasureFileURL': '',
-            'Url_No': URL_NO,
+            'Url_No': str(URL_NO),
             'CategoryId': categoryId,
             'brandId': brandId,
             'brand': brand,
@@ -259,12 +258,11 @@ def provideSource(html,itemData,data):
             'InsertDate': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
             'ModifyDate': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
             'ShorName': '',
-            'shopID': shopID
+            'shopID': str(shopID)
         }
         print 'get Detail Data...'
         # SaveDetailContent(detailContent)
-
-        updateCustomItemDetailTB(str(itemData['ItemID']),str(itemData['ItemName']),detailContent,'HaveInHand')
+        updateCustomItemDetailTB(itemData['ItemID'], str(itemData['ItemName']),str(itemData['TreasureID']),detailContent,'HaveInHand')
 
         lastPage = getLastPage(str(itemId), str(spuId), str(sellerId))
 
@@ -280,7 +278,7 @@ def provideSource(html,itemData,data):
             time.sleep(random.randint(3,5))
 
         print brand, brandId, categoryId, rootCatId, spuId, title, shopID, StyleName, shopName, itemId, categoryName, EvaluationScores, URL_NO, lastPage
-        updateCustomItemDetailTB(itemData['ItemID'],itemData['ItemName'],detailContent, 'productEnd')
+        updateCustomItemDetailTB(itemData['ItemID'], str(itemData['ItemName']),str(itemData['TreasureID']),detailContent, 'productEnd')
     except Exception as e:
         print ('errorMISS---%s' % e)
 
@@ -575,21 +573,21 @@ def productExist(ItemID,ItemName,TreasureID,Treasure_Status,InsertDate):
         print 'update error---%s'%e
 
 #更新详情表
-def updateCustomItemDetailTB(ItemID,ItemName,detailContent,state):
+def updateCustomItemDetailTB(ItemID,ItemName,TreasureID,detailContent,state):
     print '进入详细内容页面啦。。。'
-    print '详细内容---',ItemName,ItemID,detailContent['TreasureID'],detailContent['TreasureName'], detailContent['TreasureLink'], detailContent['ShopName'],detailContent['TreasureID']#, rootCatId, spuId, title, shopID, StyleName, shopName, itemId, categoryName, EvaluationScores, URL_NO, lastPage
+    print '详细内容---',ItemName,ItemID,TreasureID,detailContent['TreasureName'], detailContent['TreasureLink'], detailContent['ShopName'],detailContent['TreasureID']#, rootCatId, spuId, title, shopID, StyleName, shopName, itemId, categoryName, EvaluationScores, URL_NO, lastPage
     try:
         if state == 'HaveInHand':
             Treasure_Status = '5'
         else:
             Treasure_Status = '1'
 
-        if tableProjectDetail.update({'ItemID':ItemID,"ItemName":ItemName,'TreasureID':detailContent['TreasureID']},{'$set':{'TreasureName':detailContent['TreasureName'],'TreasureLink':detailContent['TreasureLink'],
+        if tableProjectDetail.update({'ItemID':ItemID,"ItemName":ItemName,'TreasureID':TreasureID},{'$set':{'TreasureName':detailContent['TreasureName'],'TreasureLink':detailContent['TreasureLink'],
                                                                                 'ShopName':detailContent['ShopName'],'Category_Name':detailContent['Category_Name'],'spuId':detailContent['spuId'],
                                                                                   'EvaluationScores':detailContent['EvaluationScores'],'ShopURL':detailContent['ShopURL'],
                                                                                   'Url_No':detailContent['Url_No'],'CategoryId':detailContent['CategoryId'],'brandId':detailContent['brandId'],
                                                                                   'brand':detailContent['brand'],'rootCatId':detailContent['rootCatId'],'StyleName':detailContent['StyleName'],
-                                                                                  'ItemName':detailContent['ItemName'],'InsertDate':detailContent['InsertDate'],'ModifyDate':detailContent['ModifyDate'],
+                                                                                  'InsertDate':detailContent['InsertDate'],'ModifyDate':detailContent['ModifyDate'],
                                                                                   'shopID':detailContent['shopID'],'Treasure_Status':Treasure_Status
                                                                                   }}):
             print 'Update successful****************1'
