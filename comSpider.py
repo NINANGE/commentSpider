@@ -823,9 +823,9 @@ def save_img(imgURL,filename):
 
 #评价描述评分
 def evaluationScoreURL(itemId,spuId,sellerId):
-    print '进入评价描述评分'
-    evaluationScoresURL = 'https://dsr-rate.tmall.com/list_dsr_info.htm?itemId=' + str(itemId) + '&spuId=' + str(spuId) + '&sellerId=' + str(sellerId)
 
+    evaluationScoresURL = 'https://dsr-rate.tmall.com/list_dsr_info.htm?itemId=' + str(itemId) + '&spuId=' + str(spuId) + '&sellerId=' + str(sellerId)
+    print '进入评价描述评分--%s'%evaluationScoresURL
     request = urllib2.Request(url=evaluationScoresURL, headers=headers)
     # 获得回送的数据
     response = urllib2.urlopen(request)
@@ -836,6 +836,7 @@ def evaluationScoreURL(itemId,spuId,sellerId):
     apiData = re.findall(comments, result, re.S)[0]
 
     datas = json.loads(apiData)
+    print '结束评价描述评分'
     return datas['dsr']['gradeAvg']
 
 #全部评价数据源
