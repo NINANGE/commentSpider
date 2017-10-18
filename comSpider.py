@@ -266,7 +266,7 @@ def provideSource(html,itemData,data):
             'ShorName': '',
             'shopID': shopID
         }
-
+        print 'get Detail Data...'
         # SaveDetailContent(detailContent)
 
         updateCustomItemDetailTB(itemData['ItemID'],detailContent,'HaveInHand')
@@ -581,6 +581,7 @@ def productExist(ItemID,ItemName,TreasureID,Treasure_Status,InsertDate):
 
 #更新详情表
 def updateCustomItemDetailTB(ItemID,detailContent,state):
+    print '进入详细内容页面啦。。。'
     print '详细内容---%s'%detailContent['TreasureName'], detailContent['TreasureLink'], detailContent['ShopName'],ItemID,detailContent['TreasureID']#, rootCatId, spuId, title, shopID, StyleName, shopName, itemId, categoryName, EvaluationScores, URL_NO, lastPage
     try:
         if state == 'HaveInHand':
