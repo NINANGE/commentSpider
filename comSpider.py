@@ -235,7 +235,7 @@ def provideSource(html,itemData,data):
 
         # 评价描述评分
         EvaluationScores = evaluationScoreURL(str(itemId), str(spuId), str(sellerId))
-
+        print '数据源----***----',ItemID,str(itemId),title,TreasureLink,shopName,categoryName,spuId,EvaluationScores,ShopURL,URL_NO,categoryId,brandId,brand,rootCatId,StyleName,str(itemData['ItemName']),shopID
         detailContent = {
             'ItemID': ItemID,
             'TreasureID': str(itemId),
