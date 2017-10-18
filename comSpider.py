@@ -69,9 +69,9 @@ def commentSpider():
     service_args.append('--disk-cache=yes')  ##开启缓存
     service_args.append('--ignore-ssl-errors=true')  ##忽略https错误
 
-    driver = webdriver.PhantomJS(executable_path=r'/usr/bin/phantomjs',service_args=service_args, desired_capabilities=dcap) #TODO:XDF 针对Linux
+    # driver = webdriver.PhantomJS(executable_path=r'/usr/bin/phantomjs',service_args=service_args, desired_capabilities=dcap) #TODO:XDF 针对Linux
 
-    # driver = webdriver.PhantomJS(executable_path=r'/Users/zhuoqin/Desktop/Python/SeleniumDemo/phantomjs', desired_capabilities=dcap) #TODO:XDF 针对本地调试
+    driver = webdriver.PhantomJS(executable_path=r'/Users/zhuoqin/Desktop/Python/SeleniumDemo/phantomjs', desired_capabilities=dcap) #TODO:XDF 针对本地调试
     # wait = WebDriverWait(driver, 60, 0.5)  # 表示给browser浏览器一个10秒的加载时间
 
     try:
@@ -158,7 +158,7 @@ def commentSpider():
                     print '显性未加载成功---%s' % e
 
                 #判断是否已登录
-                JudgeLoginSuccess(driver)
+                # JudgeLoginSuccess(driver)
                 time.sleep(random.uniform(3,5))
                 html = driver.page_source
                 # print html
@@ -203,7 +203,7 @@ def provideSource(html,itemData,data):
         # 下面这两种都可以获取到
         # URL_NO = doc.find('#LineZing').attr('shopid')
         URL_NO = datas['rstShopId']
-        ItemID = uuid.uuid1()
+        # ItemID = uuid.uuid1()
         TreasureLink = 'https://detail.tmall.com/item.htm?id=' + str(itemId)
         try:
             ShopURL = str(doc.find('.shopLink').attr('href'))
@@ -230,10 +230,10 @@ def provideSource(html,itemData,data):
 
         # 评价描述评分
         EvaluationScores = evaluationScoreURL(str(itemId), str(spuId), str(sellerId))
-        print '数据源----***----',ItemID,str(itemId),title,TreasureLink,shopName,categoryName,spuId,EvaluationScores,ShopURL,URL_NO,categoryId,brandId,brand,rootCatId,StyleName,str(itemData['ItemName']),shopID
+        print '数据源----***----',itemData['ItemID'],itemId,title,TreasureLink,shopName,categoryName,spuId,EvaluationScores,ShopURL,URL_NO,categoryId,brandId,brand,rootCatId,StyleName,str(itemData['ItemName']),shopID
         detailContent = {
-            'ItemID': ItemID,
-            'TreasureID': str(itemId),
+            'ItemID': str(itemId),
+            'TreasureID': itemId,
             'TreasureName': title,
             'TreasureLink': TreasureLink,
             'ShopName': shopName,
@@ -264,7 +264,7 @@ def provideSource(html,itemData,data):
         print 'get Detail Data...'
         # SaveDetailContent(detailContent)
 
-        updateCustomItemDetailTB(itemData['ItemID'],detailContent,'HaveInHand')
+        updateCustomItemDetailTB(str(itemData['ItemID']),str(itemData['ItemName']),detailContent,'HaveInHand')
 
         lastPage = getLastPage(str(itemId), str(spuId), str(sellerId))
 
@@ -280,7 +280,7 @@ def provideSource(html,itemData,data):
             time.sleep(random.randint(3,5))
 
         print brand, brandId, categoryId, rootCatId, spuId, title, shopID, StyleName, shopName, itemId, categoryName, EvaluationScores, URL_NO, lastPage
-        updateCustomItemDetailTB(itemData['ItemID'],detailContent, 'productEnd')
+        updateCustomItemDetailTB(itemData['ItemID'],itemData['ItemName'],detailContent, 'productEnd')
     except Exception as e:
         print ('errorMISS---%s' % e)
 
@@ -575,16 +575,16 @@ def productExist(ItemID,ItemName,TreasureID,Treasure_Status,InsertDate):
         print 'update error---%s'%e
 
 #更新详情表
-def updateCustomItemDetailTB(ItemID,detailContent,state):
+def updateCustomItemDetailTB(ItemID,ItemName,detailContent,state):
     print '进入详细内容页面啦。。。'
-    print '详细内容---%s'%detailContent['TreasureName'], detailContent['TreasureLink'], detailContent['ShopName'],ItemID,detailContent['TreasureID']#, rootCatId, spuId, title, shopID, StyleName, shopName, itemId, categoryName, EvaluationScores, URL_NO, lastPage
+    print '详细内容---',ItemName,ItemID,detailContent['TreasureID'],detailContent['TreasureName'], detailContent['TreasureLink'], detailContent['ShopName'],detailContent['TreasureID']#, rootCatId, spuId, title, shopID, StyleName, shopName, itemId, categoryName, EvaluationScores, URL_NO, lastPage
     try:
         if state == 'HaveInHand':
             Treasure_Status = '5'
         else:
             Treasure_Status = '1'
 
-        if tableProjectDetail.update({'ItemID':ItemID,"ItemName":detailContent['ItemName'],'TreasureID':detailContent['TreasureID']},{'$set':{'TreasureName':detailContent['TreasureName'],'TreasureLink':detailContent['TreasureLink'],
+        if tableProjectDetail.update({'ItemID':ItemID,"ItemName":ItemName,'TreasureID':detailContent['TreasureID']},{'$set':{'TreasureName':detailContent['TreasureName'],'TreasureLink':detailContent['TreasureLink'],
                                                                                 'ShopName':detailContent['ShopName'],'Category_Name':detailContent['Category_Name'],'spuId':detailContent['spuId'],
                                                                                   'EvaluationScores':detailContent['EvaluationScores'],'ShopURL':detailContent['ShopURL'],
                                                                                   'Url_No':detailContent['Url_No'],'CategoryId':detailContent['CategoryId'],'brandId':detailContent['brandId'],
@@ -949,9 +949,12 @@ def getCommentResults(commentURL,getNO):
         if getNO == 'comResult':
             time.sleep(random.randint(4,10)) #这里是间隔请求时间随机数，避免被认为是程序执行
 
-        req = urllib2.Request(commentURL)  # req表示向服务器发送请求#
-        response = urllib2.urlopen(req)  # response表示通过调用urlopen并传入req返回响应 response#
-        result = response.read()  # 用read解析获得的HTML文件#
+        # req = urllib2.Request(commentURL)  # req表示向服务器发送请求#
+        # response = urllib2.urlopen(req)  # response表示通过调用urlopen并传入req返回响应 response#
+        # result = response.read()  # 用read解析获得的HTML文件#
+
+        BuildingDetailHTML = requests.get(commentURL)  # ,proxies=proxy
+        result = BuildingDetailHTML.text
 
         """
             这里要特别注意了，如果单纯用try内这种解码方式可能会报错：UnicodeDecodeError: 'gbk' codec can't decode bytes in position 6681-6682: illegal multibyte sequence ，很明显是编码问题
@@ -1048,8 +1051,8 @@ def getAllCommentData(CommentData,commentItemID,shopName,itemId,title,TreasureLi
             'EvaluationScores':EvaluationScores,
             'ItemID':ItemID
         }
-
-        saveCommentContent(allCommentContent)
+        print allCommentContent
+        # saveCommentContent(allCommentContent)
 
 #评论图片处理
 def ImgServiceURL(pics):
