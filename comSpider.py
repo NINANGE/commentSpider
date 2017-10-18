@@ -274,7 +274,7 @@ def provideSource(html,itemData,data):
             else:
                 continue
             # 获取所有评论内容并保存到mongodb
-            getAllCommentData(CommentData, str(data['ItemID']), shopName, str(itemId), title, TreasureLink,categoryName, str(itemData['ItemName']), EvaluationScores, data['ItemID'])
+            getAllCommentData(CommentData, str(data['ItemID']), shopName, str(itemData['TreasureID']), title, TreasureLink,categoryName, str(itemData['ItemName']), EvaluationScores, data['ItemID'])
             time.sleep(random.randint(3,5))
 
         print brand, brandId, categoryId, rootCatId, spuId, title, shopID, StyleName, shopName, itemId, categoryName, EvaluationScores, URL_NO, lastPage
@@ -994,7 +994,7 @@ def getCommentResults(commentURL,getNO):
 
 
 #获取所有评论内容并保存到mongodb
-def getAllCommentData(CommentData,commentItemID,shopName,itemId,title,TreasureLink,categoryName,itemName,EvaluationScores,ItemID):
+def getAllCommentData(CommentData,commentItemID,shopName,TreasureID,title,TreasureLink,categoryName,itemName,EvaluationScores,ItemID):
     import sys
     reload(sys)
     sys.setdefaultencoding('utf-8')
@@ -1028,7 +1028,7 @@ def getAllCommentData(CommentData,commentItemID,shopName,itemId,title,TreasureLi
 
         allCommentContent = {
             # 'itemID': commentItemID,
-            'TreasureID': itemId,
+            'TreasureID': TreasureID,
             'TreasureName': title,
             'displayUserNick': displayUserNick,
             'rateContent': rateContent,
@@ -1050,7 +1050,7 @@ def getAllCommentData(CommentData,commentItemID,shopName,itemId,title,TreasureLi
             'ItemID':ItemID
         }
         print allCommentContent
-        # saveCommentContent(allCommentContent)
+        saveCommentContent(allCommentContent)
 
 #评论图片处理
 def ImgServiceURL(pics):
