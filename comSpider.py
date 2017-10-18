@@ -18,7 +18,7 @@ from lxml import etree
 import chardet
 import pandas as pd
 from gevent import monkey; monkey.patch_ssl()
-import gevent
+import requests
 import re
 import uuid
 import urllib,urllib2
@@ -32,6 +32,7 @@ reload(sys)
 sys.setdefaultencoding('utf-8')
 #验证接口
 url = 'https://v2-api.jsdama.com/upload'
+
 
 client = pymongo.MongoClient('192.168.3.172',27017)
 # client = pymongo.MongoClient('127.0.0.1',27017)
@@ -47,7 +48,7 @@ headers = {'UserAgent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_5) AppleWe
 def commentSpider():
 
     # TODO:XDF Chrome欲歌浏览器
-    options = webdriver.ChromeOptions()
+    # options = webdriver.ChromeOptions()
 
     # 设置中文
     # options.add_argument('lang=zh_CN.UTF-8')#'lang=zh_CN.UTF-8',--proxy-server=http://220.166.242.8:8118
@@ -640,16 +641,6 @@ def styleNames(styleData):
             StyleName = '-'
     return StyleName
 
-#TODO:XDF 这里是匹配类目ID获取类目
-# def categoryNames(categoryId):
-#     for k in range(0, len(allCategory)):
-#         if str(allCategory['CategoryId'][k]) == categoryId:
-#             categoryName = str(allCategory['CategoryName'][k])
-#             break
-#         else:
-#             categoryName = '-'
-#     return categoryName
-
 #通过请求获取类目
 def categoryNamesQly(TreasureID):
     url = 'http://plugin.qly360.com/productDetailList.do?spid='+TreasureID
@@ -820,15 +811,22 @@ def evaluationScoreURL(itemId,spuId,sellerId):
 
     evaluationScoresURL = 'https://dsr-rate.tmall.com/list_dsr_info.htm?itemId=' + str(itemId) + '&spuId=' + str(spuId) + '&sellerId=' + str(sellerId)
     print '进入评价描述评分--%s'%evaluationScoresURL
-    request = urllib2.Request(url=evaluationScoresURL, headers=headers)
-    # 获得回送的数据
-    response = urllib2.urlopen(request)
-    print '进入评价描述评分--2'
-    result = response.read()
-    comments = '.*\((.*?)\)'
+    # request = urllib2.Request(url=evaluationScoresURL, headers=headers)
+    # # 获得回送的数据
+    # response = urllib2.urlopen(request)
+    # print '进入评价描述评分--2'
+    # result = response.read()
+    # comments = '.*\((.*?)\)'
+    #
+    # apiData = re.findall(comments, result, re.S)[0]
+    # print '进入评价描述评分--3---%s' % apiData
+    # datas = json.loads(apiData)
+    # print '结束评价描述评分'
+    # return datas['dsr']['gradeAvg']
 
-    apiData = re.findall(comments, result, re.S)[0]
-    print '进入评价描述评分--3---%s' % apiData
+    BuildingDetailHTML = requests.get(evaluationScoresURL)  # ,proxies=proxy
+    comments = '.*\((.*?)\)'
+    apiData = re.findall(comments, BuildingDetailHTML.text, re.S)[0]
     datas = json.loads(apiData)
     print '结束评价描述评分'
     return datas['dsr']['gradeAvg']
