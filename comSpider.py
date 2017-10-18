@@ -33,12 +33,6 @@ sys.setdefaultencoding('utf-8')
 #验证接口
 url = 'https://v2-api.jsdama.com/upload'
 
-# allCategory = pd.read_csv('otherFile/taoBaoCategory.csv')
-
-# allCategory = pd.read_csv('/home/django/nange/commentSpider/otherFile/taoBaoCategory.csv')
-
-# categoryUrl = 'https://detail.tmall.com/item.htm?id=17731025119'
-
 client = pymongo.MongoClient('192.168.3.172',27017)
 # client = pymongo.MongoClient('127.0.0.1',27017)
 db = client.CommentDB
@@ -829,12 +823,12 @@ def evaluationScoreURL(itemId,spuId,sellerId):
     request = urllib2.Request(url=evaluationScoresURL, headers=headers)
     # 获得回送的数据
     response = urllib2.urlopen(request)
-
+    print '进入评价描述评分--2'
     result = response.read()
     comments = '.*\((.*?)\)'
 
     apiData = re.findall(comments, result, re.S)[0]
-
+    print '进入评价描述评分--3---%s' % apiData
     datas = json.loads(apiData)
     print '结束评价描述评分'
     return datas['dsr']['gradeAvg']
