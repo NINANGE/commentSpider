@@ -53,37 +53,37 @@ headers = {'UserAgent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_5) AppleWe
 def commentSpider():
 
     # TODO:XDF Chrome欲歌浏览器
-    options = webdriver.ChromeOptions()
-
-    # 设置中文
-    options.add_argument('lang=zh_CN.UTF-8')#'lang=zh_CN.UTF-8',--proxy-server=http://220.166.242.8:8118
-    prefs = {"profile.managed_default_content_settings.images": 2}
-    options.add_experimental_option("prefs", prefs)  # TODO:XDF 禁止加载图片
-    # 更换头部
-    options.add_argument(
-        'user-agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.101 Safari/537.36"')
-    driver = webdriver.Chrome(chrome_options=options,executable_path=r'/Users/zhuoqin/Desktop/Python/SeleniumDemo/chromedriver')
+    # options = webdriver.ChromeOptions()
+    #
+    # # 设置中文
+    # options.add_argument('lang=zh_CN.UTF-8')#'lang=zh_CN.UTF-8',--proxy-server=http://220.166.242.8:8118
+    # prefs = {"profile.managed_default_content_settings.images": 2}
+    # options.add_experimental_option("prefs", prefs)  # TODO:XDF 禁止加载图片
+    # # 更换头部
+    # options.add_argument(
+    #     'user-agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.101 Safari/537.36"')
+    # driver = webdriver.Chrome(chrome_options=options,executable_path=r'/Users/zhuoqin/Desktop/Python/SeleniumDemo/chromedriver')
 
     # TODO:XDF phantomjs无头浏览器
-    # dcap = dict(DesiredCapabilities.PHANTOMJS)
-    # dcap["phantomjs.page.settings.userAgent"] = ("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.101 Safari/537.36")  # 设置user-agent请求头
-    # dcap["phantomjs.page.settings.loadImages"] = False  # 禁止加载图片
-    #
-    # service_args = []
-    # service_args.append('--load-images=no')  ##关闭图片加载
-    # service_args.append('--disk-cache=yes')  ##开启缓存
-    # service_args.append('--ignore-ssl-errors=true')  ##忽略https错误
-    #
-    # driver = webdriver.PhantomJS(executable_path=r'/usr/bin/phantomjs',service_args=service_args, desired_capabilities=dcap) #TODO:XDF 针对Linux
-    #
-    # # driver = webdriver.PhantomJS(executable_path=r'/Users/zhuoqin/Desktop/Python/SeleniumDemo/phantomjs', desired_capabilities=dcap) #TODO:XDF 针对本地调试
-    # # wait = WebDriverWait(driver, 60, 0.5)  # 表示给browser浏览器一个10秒的加载时间
-    #
-    # try:
-    #     driver.implicitly_wait(30)
-    #     driver.set_page_load_timeout(30)
-    # except Exception as e:
-    #     print 'waitMiss-----%s'%e
+    dcap = dict(DesiredCapabilities.PHANTOMJS)
+    dcap["phantomjs.page.settings.userAgent"] = ("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.101 Safari/537.36")  # 设置user-agent请求头
+    dcap["phantomjs.page.settings.loadImages"] = False  # 禁止加载图片
+
+    service_args = []
+    service_args.append('--load-images=no')  ##关闭图片加载
+    service_args.append('--disk-cache=yes')  ##开启缓存
+    service_args.append('--ignore-ssl-errors=true')  ##忽略https错误
+
+    driver = webdriver.PhantomJS(executable_path=r'/usr/bin/phantomjs',service_args=service_args, desired_capabilities=dcap) #TODO:XDF 针对Linux
+
+    # driver = webdriver.PhantomJS(executable_path=r'/Users/zhuoqin/Desktop/Python/SeleniumDemo/phantomjs', desired_capabilities=dcap) #TODO:XDF 针对本地调试
+    # wait = WebDriverWait(driver, 60, 0.5)  # 表示给browser浏览器一个10秒的加载时间
+
+    try:
+        driver.implicitly_wait(30)
+        driver.set_page_load_timeout(30)
+    except Exception as e:
+        print 'waitMiss-----%s'%e
 
 
 
