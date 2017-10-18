@@ -155,22 +155,22 @@ def commentSpider():
                 #     provideSouceTaoBao(html, itemData, data)
                 # else:
 
-                    try:
-                        # wait.until(EC.presence_of_element_located((By.CLASS_NAME, 'tb-detail-hd')))  # 显性等待
-                        wait.until(EC.presence_of_element_located((By.ID,'J_AttrUL'))) # 显性等待
-                        time.sleep(random.randint(3,5))
-                    except Exception as e:
-                        print '显性未加载成功---%s' % e
+                try:
+                    # wait.until(EC.presence_of_element_located((By.CLASS_NAME, 'tb-detail-hd')))  # 显性等待
+                    wait.until(EC.presence_of_element_located((By.ID,'J_AttrUL'))) # 显性等待
+                    time.sleep(random.randint(3,5))
+                except Exception as e:
+                    print '显性未加载成功---%s' % e
 
-                    #判断是否已登录
-                    JudgeLoginSuccess(driver)
-                    time.sleep(random.uniform(3,5))
-                    html = driver.page_source
-                    # print html
-                    """
-                        提取相关元素
-                    """
-                    provideSource(html,itemData,data)
+                #判断是否已登录
+                JudgeLoginSuccess(driver)
+                time.sleep(random.uniform(3,5))
+                html = driver.page_source
+                # print html
+                """
+                    提取相关元素
+                """
+                provideSource(html,itemData,data)
 
             updateProjectTBState(data['ItemID'],'expire')
 
