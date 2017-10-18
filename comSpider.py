@@ -17,6 +17,8 @@ import pymongo
 from lxml import etree
 import chardet
 import pandas as pd
+from gevent import monkey; monkey.patch_ssl()
+import gevent
 import re
 import uuid
 import urllib,urllib2
@@ -33,16 +35,17 @@ url = 'https://v2-api.jsdama.com/upload'
 
 # allCategory = pd.read_csv('otherFile/taoBaoCategory.csv')
 
-allCategory = pd.read_csv('/home/django/nange/commentSpider/otherFile/taoBaoCategory.csv')
+# allCategory = pd.read_csv('/home/django/nange/commentSpider/otherFile/taoBaoCategory.csv')
 
 # categoryUrl = 'https://detail.tmall.com/item.htm?id=17731025119'
 
-client = pymongo.MongoClient('192.168.3.172',27017)
+# client = pymongo.MongoClient('192.168.3.172',27017)
+client = pymongo.MongoClient('127.0.0.1',27017)
 db = client.CommentDB
 commentContentTB = db.commentContentTB
 tableProject = db.commProjectTB
 tableProjectDetail = db.commentCustomItemDetailTB
-
+AnonymousIPTB = db.AnonymousIPTB
 
 
 headers = {'UserAgent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.101 Safari/537.36'}
@@ -53,7 +56,7 @@ def commentSpider():
     # options = webdriver.ChromeOptions()
     #
     # # 设置中文
-    # options.add_argument('lang=zh_CN.UTF-8')
+    # options.add_argument('lang=zh_CN.UTF-8')#'lang=zh_CN.UTF-8',--proxy-server=http://220.166.242.8:8118
     # prefs = {"profile.managed_default_content_settings.images": 2}
     # options.add_experimental_option("prefs", prefs)  # TODO:XDF 禁止加载图片
     # # 更换头部
@@ -75,7 +78,7 @@ def commentSpider():
 
     # driver = webdriver.PhantomJS(executable_path=r'/Users/zhuoqin/Desktop/Python/SeleniumDemo/phantomjs', desired_capabilities=dcap) #TODO:XDF 针对本地调试
     # wait = WebDriverWait(driver, 60, 0.5)  # 表示给browser浏览器一个10秒的加载时间
-    #
+
     try:
         driver.implicitly_wait(30)
         driver.set_page_load_timeout(30)
@@ -87,9 +90,6 @@ def commentSpider():
     wait = WebDriverWait(driver, 200, 0.5)  # 表示给browser浏览器一个10秒的加载时间
 
     # projectData = tableProject.find({'Trailer_Tips': '待开启'})
-
-
-
 
     while True: #这里设置成死循环是因为项目一创建就启动爬虫，后面创建就不会执行，故：用死循环的方式进行检测
         projectData = tableProject.find({'Trailer_Tips': '正在爬取中...'})
@@ -145,29 +145,36 @@ def commentSpider():
                 else:
                     print 'tmall..', '不存在'
 
-                try:
-                    # wait.until(EC.presence_of_element_located((By.CLASS_NAME, 'tb-detail-hd')))  # 显性等待
-                    wait.until(EC.presence_of_element_located((By.ID,'J_AttrUL'))) # 显性等待
-                    time.sleep(random.randint(3,5))
-                except Exception as e:
-                    print '显性未加载成功---%s' % e
+                # if ('item.taobao.com' in driver.current_url):
+                #     try:
+                #         wait.until(EC.presence_of_element_located((By.CLASS_NAME, 'attributes-list')))  # 显性等待
+                #         time.sleep(random.randint(3, 5))
+                #     except Exception as e:
+                #         print '显性未加载成功---%s' % e
+                #     html = driver.page_source
+                #     provideSouceTaoBao(html, itemData, data)
+                # else:
 
-                #判断是否已登录
-                JudgeLoginSuccess(driver)
-                time.sleep(random.uniform(3,5))
-                html = driver.page_source
-                # print html
-                """
-                    提取相关元素
-                """
-                provideSource(html,itemData,data)
+                    try:
+                        # wait.until(EC.presence_of_element_located((By.CLASS_NAME, 'tb-detail-hd')))  # 显性等待
+                        wait.until(EC.presence_of_element_located((By.ID,'J_AttrUL'))) # 显性等待
+                        time.sleep(random.randint(3,5))
+                    except Exception as e:
+                        print '显性未加载成功---%s' % e
+
+                    #判断是否已登录
+                    JudgeLoginSuccess(driver)
+                    time.sleep(random.uniform(3,5))
+                    html = driver.page_source
+                    # print html
+                    """
+                        提取相关元素
+                    """
+                    provideSource(html,itemData,data)
 
             updateProjectTBState(data['ItemID'],'expire')
 
-        #
         time.sleep(random.randint(3,8))
-
-
 
     print '结束完成'
     # time.sleep(2)
@@ -262,30 +269,265 @@ def provideSource(html,itemData,data):
 
         # SaveDetailContent(detailContent)
 
-        updateCustomItemDetailTB(itemData['ItemID'],detailContent,'HaveInHand')
+        updateCustomItemDetailTB(itemData['ItemID'],str(itemData['ItemName']),detailContent,'HaveInHand')
 
         lastPage = getLastPage(str(itemId), str(spuId), str(sellerId))
 
         print brand, brandId, categoryId, rootCatId, spuId, title, shopID, StyleName, shopName, itemId, categoryName, EvaluationScores, URL_NO, lastPage
         for page in range(1, lastPage + 1):
             print '第%s次' % page
-
             if commentContent(str(itemId), str(spuId), str(sellerId), str(page)):
-
                 CommentData = commentContent(str(itemId), str(spuId), str(sellerId), str(page))["rateDetail"]["rateList"]
             else:
                 continue
-
             # 获取所有评论内容并保存到mongodb
             getAllCommentData(CommentData, str(data['ItemID']), shopName, str(itemId), title, TreasureLink,categoryName, str(itemData['ItemName']), EvaluationScores, data['ItemID'])
-
             time.sleep(random.randint(3,5))
 
         print brand, brandId, categoryId, rootCatId, spuId, title, shopID, StyleName, shopName, itemId, categoryName, EvaluationScores, URL_NO, lastPage
-        updateCustomItemDetailTB(itemData['ItemID'],detailContent, 'productEnd')
+        updateCustomItemDetailTB(itemData['ItemID'],str(itemData['ItemName']),detailContent, 'productEnd')
     except Exception as e:
         print ('errorMISS---%s' % e)
 
+"""
+    淘宝提取相关元素
+"""
+def provideSouceTaoBao(html,itemData,data):
+    doc = pq(html)
+    shopName = doc.find('.shop-name-link').text()
+    title = doc.find('#J_Title .tb-main-title').attr('data-title')
+    try:
+        ShopURL = str(doc.find('.shop-name-link').attr('href'))
+        print type(ShopURL)
+        if len(ShopURL):
+            ShopURL = ShopURL.replace('//', '')
+        else:
+            ShopURL = '-'
+    except Exception as e:
+        print e
+
+    # print '类型---%s'%categoryId
+    styleData = doc.find('.attributes-list').children().items()
+    # 风格
+    StyleName = styleNames(styleData)
+    # 因为styleData是一个迭代器，被循环完的就会被释放掉（品牌有可能在查找风格的时候循环过去了，已经被释放掉了），所以这里得重新赋值数据源
+    brandData = doc.find('.attributes-list').children().items()
+    # 品牌
+    brand = brandName(brandData)
+
+    ItemID = uuid.uuid1()
+    spuIds = "shopId           : '(.*?)',"
+    shopID = re.findall(spuIds, html, re.S)[0]
+
+    sellerIds = "sellerId         : '(.*?)'"
+    sellerId = re.findall(sellerIds, html, re.S)[0]
+    categoryIds = "cid              : '(.*?)',"
+    categoryId = re.findall(categoryIds, html, re.S)[0]
+    rootCatIds = "rcid             : '(.*?)',"
+    rootCatId = re.findall(rootCatIds, html, re.S)[0]
+    itemId = "itemId           : '(.*?)'"
+    TreasureID = re.findall(itemId, html, re.S)[0]
+    URL_NO = "rstShopId     : '(.*?)',"
+    URL_NO = re.findall(URL_NO, html, re.S)[0]
+    TreasureLink = 'https://item.taobao.com/item.htm?id=' + str(TreasureID)
+    categoryName = categoryNamesQly(TreasureID)
+    EvaluationScores = '0'
+    spuId = ''
+    brandId = ''
+    detailContent = {
+        'ItemID': ItemID,
+        'TreasureID': str(TreasureID),
+        'TreasureName': title,
+        'TreasureLink': TreasureLink,
+        'ShopName': shopName,
+        'Shop_Platform': 1,
+        'Treasure_Status': 1,
+        'Monthly_Volume': 0,
+        'IsMerge': 0,
+        'MergeGuid': '',
+        'Category_Name': categoryName,
+        'GrpName': '',
+        'spuId': spuId,
+        'EvaluationScores': EvaluationScores,
+        'ShopURL': ShopURL,
+        'TreasureFileURL': '',
+        'Url_No': URL_NO,
+        'CategoryId': categoryId,
+        'brandId': brandId,
+        'brand': brand,
+        'rootCatId': rootCatId,
+        'StyleName': StyleName,
+        'CollectionNum': 0,
+        'ItemName': str(itemData['ItemName']),
+        'InsertDate': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+        'ModifyDate': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+        'ShorName': '',
+        'shopID': shopID
+    }
+
+    # SaveDetailContent(detailContent)
+
+    updateCustomItemDetailTB(itemData['ItemID'], detailContent, 'HaveInHand')
+    print '店铺名-----1%s' % shopName, title, StyleName, brand, categoryName, shopID, sellerId, categoryId
+    time.sleep(random.randint(15, 20))  # 这里得让他睡眠一下，否则第二页开始会报错(加载数据)
+
+    lastPage = getTaoBaoAllPage(sellerId,str(TreasureID))
+    for page in range(1, int(lastPage) + 1):
+        print '开始进行淘宝评论爬取。。。。。。。。'
+        taoBaoCommentResult = getTaoBaoCommentData(TreasureID,sellerId,page)
+        if taoBaoCommentResult:
+            getTaoBaoCommentAndSaveMongo(taoBaoCommentResult,TreasureID,title,TreasureLink,shopName,categoryName, str(itemData['ItemName']), EvaluationScores, data['ItemID'])
+        else:
+            continue
+        time.sleep(random.randint(3, 5))
+    updateCustomItemDetailTB(itemData['ItemID'], detailContent, 'productEnd')
+
+#为了精准度，我们首先获取该评论内容的总页数
+def getTaoBaoAllPage(sellerId,TreasureID):
+    i = 0
+    IPAndPort = GetIPData()
+    while True:
+        time.sleep(random.uniform(8, 20))
+        RequstURL = 'https://rate.taobao.com/feedRateList.htm?auctionNumId='+TreasureID+'&userNumId=' + sellerId + '&currentPageNum=1&pageSize=20&rateType=&orderType=feedbackdate&attribute=&hasSku=false&folded=0'
+        print RequstURL
+        proxy = {
+            'http': "http://220.166.242.8:8118","https":"http://120.78.15.63:80",
+        }
+        BuildingDetailHTML = requests.get(RequstURL,proxies=proxy) #,proxies=proxy
+        BuildingDetailHTML.encoding = 'gbk'
+        print BuildingDetailHTML.text
+        if 'https://sec.taobao.com/' in BuildingDetailHTML.text:
+            print 'enter----login'
+            time.sleep(random.uniform(4, 6))
+            if i == 40:
+                total = 0
+                break
+            i += 1
+        else:
+            requestResponse = '\((.*?)\)'
+            shopIdData = re.findall(requestResponse, BuildingDetailHTML.text, re.S)[0]
+            commentResult = json.loads(shopIdData)
+            totals = commentResult['total']
+
+            if totals<20:
+                total = 1
+            else:
+                Page = totals//20
+                Remainder = totals%20
+                if Remainder>0:
+                    total = Page+1
+                else:
+                    total = Page
+            print '总页数----%s' % total
+            break
+
+        time.sleep(random.uniform(8, 20))
+    return total
+
+#ip数据源
+def GetIPData():
+    IPAddressPortList = []
+    result = AnonymousIPTB.find({})
+    for data in result:
+        IPAddressPortList.append(data['IPWithPort'])
+    return IPAddressPortList
+
+# 获取淘宝评论内容数据源
+def getTaoBaoCommentData(TreasureID,sellerId,page):
+    i = 0
+    while True:
+        time.sleep(random.uniform(8, 20))
+        RequstURL = 'https://rate.taobao.com/feedRateList.htm?auctionNumId=' + str(TreasureID) + '&userNumId=' + str(sellerId) + '&currentPageNum=' + str(page) + '&pageSize=20&rateType=&orderType=feedbackdate&attribute=&hasSku=false&folded=0'
+        print RequstURL
+
+        BuildingDetailHTML = requests.get(RequstURL)
+        BuildingDetailHTML.encoding = 'gbk'
+        print BuildingDetailHTML.text
+        if 'https://sec.taobao.com/' in BuildingDetailHTML.text:
+            print 'enter----login'
+            time.sleep(random.uniform(4, 6))
+            if i == 40:
+                taoBaoCommentResult = {}
+                break
+            i += 1
+            time.sleep(random.uniform(8, 20))
+        else:
+            requestResponse = '\((.*?)\)'
+            shopIdData = re.findall(requestResponse, BuildingDetailHTML.text, re.S)[0]
+            taoBaoCommentResult = json.loads(shopIdData)
+            break
+    return taoBaoCommentResult
+
+#获取所有淘宝评论内容并保存到mongodb
+def getTaoBaoCommentAndSaveMongo(commentResult,TreasureID,Title,TreasureLink,shopName,categoryName,ItemName, EvaluationScores, ItemID):
+    # print commentResult['total'], len(commentResult['comments'])
+    mychar = chardet.detect(ItemName)
+    print '编码格式---%s' % mychar
+    commentResponse = commentResult['comments']
+    for i in range(0, len(commentResponse)):
+        content = commentResponse[i]['content']
+        displayUserNick = commentResponse[i]['user']['nick']
+        TreasureName = commentResponse[i]['auction']['title']
+        auctionSku = commentResponse[i]['auction']['sku']
+        # RateDate = str(commentResponse[i]['date'])
+        RateDate = strToDateTime(str(commentResponse[i]['date']), 'fiveAllWordTypes')
+
+        if HaveOrNoAppend(commentResponse[i]) == True:
+            IsAppend = 1
+            appendContent = commentResponse[i]['append']['content']  # 追加内容
+            dayAfterConfirm = commentResponse[i]['append']['dayAfterConfirm']  # 相隔多少天追加
+            AppendImgURL = taoBaoAppendPhotos(commentResponse[i]['append']['photos'])
+            appendCommentTime = ''
+        else:
+            IsAppend = 0
+            appendContent = '-'  # 追加内容
+            dayAfterConfirm = '-'  # 相隔多少天追加
+            AppendImgURL = '-'
+            appendCommentTime = ''
+
+        if commentResponse[i]['photos']:
+            ImgServiceURL = taoBaoAppendPhotos(commentResponse[i]['photos'])
+        else:
+            ImgServiceURL = '-'
+
+        allCommentContent = {
+            # 'itemID': commentItemID,
+            'TreasureID': TreasureID,
+            'TreasureName': Title,
+            'displayUserNick': displayUserNick,
+            'rateContent': content,
+            # 'sellerId': sellerId,
+            'auctionSku': auctionSku,
+            # 'cmsSource': cmsSource,
+            'ImgServiceURL': ImgServiceURL,
+            'RateDate': RateDate,
+            'IsAppend': IsAppend,
+            'appendCommentTime': appendCommentTime,
+            'appendContent': appendContent,
+            'appendDifferDays': dayAfterConfirm,
+            'appendPics': AppendImgURL,
+            'ShopName': shopName,
+            'Category_Name': settingNameCode(categoryName),
+            'TreasureLink': TreasureLink,
+            'ItemName': settingNameCode(ItemName),
+            'EvaluationScores': EvaluationScores,
+            'ItemID': ItemID
+        }
+
+        saveCommentContent(allCommentContent)
+
+        print content, displayUserNick, TreasureName, auctionSku, RateDate, appendContent, dayAfterConfirm, AppendImgURL, IsAppend
+
+#淘宝追加图片
+def taoBaoAppendPhotos(AppendPics):
+    appendImageServer = []
+    if len(AppendPics):
+        for i in range(0, len(AppendPics)):
+            appendImageServer.append('http:' + AppendPics[i]['url'])
+
+        AppendImageURL = ','.join(appendImageServer)
+        return AppendImageURL
+    return ''
 
 """
     判断是否已登录，未登录则先登录（这也是为了预防后面出现滑动验证），请知悉，反之，直接略过
@@ -316,25 +558,37 @@ def loginBtnExistence(driver):
         loginBtn = False
     return loginBtn
 
+#判断有无追加内容
+def HaveOrNoAppend(commentResponse):
+    try:
+        if commentResponse['append']:
+            Have = True
+        else:
+            print '----------没有追加内容-------------'
+            Have = False
+    except Exception as e:
+        print '没有追加内容'
+        Have = False
+    return Have
 
 #TODO：XDF 产品是否存在或是否为淘宝或是否还未开始爬取
 def productExist(ItemID,ItemName,TreasureID,Treasure_Status,InsertDate):
     try:
-        if tableProjectDetail.update({'ItemID':ItemID,'TreasureID':TreasureID},{'$set':{'Treasure_Status':Treasure_Status,'ItemName':ItemName,'InsertDate':InsertDate}}):
+        if tableProjectDetail.update({'ItemID':ItemID,"ItemName":ItemName,'TreasureID':TreasureID},{'$set':{'Treasure_Status':Treasure_Status,'InsertDate':InsertDate}}):
             print 'UpdateS successful'
     except Exception as e:
         print 'update error---%s'%e
 
 #更新详情表
-def updateCustomItemDetailTB(ItemID,detailContent,state):
-    print '详细内容---%s'%detailContent['TreasureName'], detailContent['TreasureLink'], detailContent['ShopName']#, rootCatId, spuId, title, shopID, StyleName, shopName, itemId, categoryName, EvaluationScores, URL_NO, lastPage
+def updateCustomItemDetailTB(ItemID,ItemName,detailContent,state):
+    print '详细内容---%s'%detailContent['TreasureName'], detailContent['TreasureLink'], detailContent['ShopName'],ItemID,detailContent['TreasureID']#, rootCatId, spuId, title, shopID, StyleName, shopName, itemId, categoryName, EvaluationScores, URL_NO, lastPage
     try:
         if state == 'HaveInHand':
             Treasure_Status = '5'
         else:
             Treasure_Status = '1'
 
-        if tableProjectDetail.update({'ItemID':ItemID,'TreasureID':detailContent['TreasureID']},{'$set':{'TreasureName':detailContent['TreasureName'],'TreasureLink':detailContent['TreasureLink'],
+        if tableProjectDetail.update({'ItemID':ItemID,"ItemName":ItemName,'TreasureID':detailContent['TreasureID']},{'$set':{'TreasureName':detailContent['TreasureName'],'TreasureLink':detailContent['TreasureLink'],
                                                                                 'ShopName':detailContent['ShopName'],'Category_Name':detailContent['Category_Name'],'spuId':detailContent['spuId'],
                                                                                   'EvaluationScores':detailContent['EvaluationScores'],'ShopURL':detailContent['ShopURL'],
                                                                                   'Url_No':detailContent['Url_No'],'CategoryId':detailContent['CategoryId'],'brandId':detailContent['brandId'],
@@ -342,7 +596,7 @@ def updateCustomItemDetailTB(ItemID,detailContent,state):
                                                                                   'ItemName':detailContent['ItemName'],'InsertDate':detailContent['InsertDate'],'ModifyDate':detailContent['ModifyDate'],
                                                                                   'shopID':detailContent['shopID'],'Treasure_Status':Treasure_Status
                                                                                   }}):
-            print 'Update successful'
+            print 'Update successful****************1'
     except Exception as e:
         print 'update error---%s'%e
 
@@ -392,14 +646,14 @@ def styleNames(styleData):
     return StyleName
 
 #TODO:XDF 这里是匹配类目ID获取类目
-def categoryNames(categoryId):
-    for k in range(0, len(allCategory)):
-        if str(allCategory['CategoryId'][k]) == categoryId:
-            categoryName = str(allCategory['CategoryName'][k])
-            break
-        else:
-            categoryName = '-'
-    return categoryName
+# def categoryNames(categoryId):
+#     for k in range(0, len(allCategory)):
+#         if str(allCategory['CategoryId'][k]) == categoryId:
+#             categoryName = str(allCategory['CategoryName'][k])
+#             break
+#         else:
+#             categoryName = '-'
+#     return categoryName
 
 #通过请求获取类目
 def categoryNamesQly(TreasureID):
@@ -776,8 +1030,6 @@ def getAllCommentData(CommentData,commentItemID,shopName,itemId,title,TreasureLi
             # appendPics = ''
             AppendImgURL = ''
 
-
-
         allCommentContent = {
             # 'itemID': commentItemID,
             'TreasureID': itemId,
@@ -827,7 +1079,26 @@ def AppendImgServiceURL(appendPics):
         return AppendImageURL
     return ' '
 
-
+#把字符串转成时间
+def strToDateTime(strs,types):
+    if types == 'threLineTypes':
+        return datetime.datetime.strptime(strs,'%Y-%m-%d')
+    elif types == 'threcolonTypes':
+        return datetime.datetime.strptime(strs, '%Y:%m:%d')
+    elif types == 'threWordTypes':
+        return datetime.datetime.strptime(strs, '%Y年%m月%d日')
+    elif types == 'fiveLineTypes':
+        return datetime.datetime.strptime(strs, '%Y-%m-%d %H:%M')
+    elif types == 'fiveColonTypes':
+        return datetime.datetime.strptime(strs, '%Y.%m.%d %H:%M')
+    elif types == 'fiveWordTypes':
+        return datetime.datetime.strptime(strs, '%Y年%m月%d日 %H时%M分')
+    elif types == 'fiveAllWordTypes':
+        return datetime.datetime.strptime(strs, '%Y年%m月%d日 %H:%M')
+    elif types == 'sixLineTypes':
+        return datetime.datetime.strptime(strs, '%Y-%m-%d %H:%M:%S')
+    else:
+        return datetime.datetime.strptime(strs, '%Y年%m月%d日 %H时%M分%S秒')
 
 """
     在爬虫中，也许会出现多种编码格式，就像KOI8-R（这也是我第一次见），如果不设置一下，会报如下错误
