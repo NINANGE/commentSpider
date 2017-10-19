@@ -267,20 +267,20 @@ def provideSource(html,itemData,data):
         lastPage = getLastPage(str(itemId), str(spuId), str(sellerId))
         if lastPage==0:
             updateCustomItemDetailTB(itemData['ItemID'], str(itemData['ItemName']), str(itemData['TreasureID']),detailContent, 'productEnd')
-            
-        print brand, brandId, categoryId, rootCatId, spuId, title, shopID, StyleName, shopName, itemId, categoryName, EvaluationScores, URL_NO, lastPage
-        for page in range(1, lastPage + 1):
-            print '第%s次' % page
-            if commentContent(str(itemId), str(spuId), str(sellerId), str(page)):
-                CommentData = commentContent(str(itemId), str(spuId), str(sellerId), str(page))["rateDetail"]["rateList"]
-            else:
-                continue
-            # 获取所有评论内容并保存到mongodb
-            getAllCommentData(CommentData, str(data['ItemID']), shopName, str(itemData['TreasureID']), title, TreasureLink,categoryName, str(itemData['ItemName']), EvaluationScores, data['ItemID'])
-            time.sleep(random.randint(3,5))
+        else:
+            print brand, brandId, categoryId, rootCatId, spuId, title, shopID, StyleName, shopName, itemId, categoryName, EvaluationScores, URL_NO, lastPage
+            for page in range(1, lastPage + 1):
+                print '第%s次' % page
+                if commentContent(str(itemId), str(spuId), str(sellerId), str(page)):
+                    CommentData = commentContent(str(itemId), str(spuId), str(sellerId), str(page))["rateDetail"]["rateList"]
+                else:
+                    continue
+                # 获取所有评论内容并保存到mongodb
+                getAllCommentData(CommentData, str(data['ItemID']), shopName, str(itemData['TreasureID']), title, TreasureLink,categoryName, str(itemData['ItemName']), EvaluationScores, data['ItemID'])
+                time.sleep(random.randint(3,5))
 
-        print brand, brandId, categoryId, rootCatId, spuId, title, shopID, StyleName, shopName, itemId, categoryName, EvaluationScores, URL_NO, lastPage
-        updateCustomItemDetailTB(itemData['ItemID'], str(itemData['ItemName']),str(itemData['TreasureID']),detailContent, 'productEnd')
+            print brand, brandId, categoryId, rootCatId, spuId, title, shopID, StyleName, shopName, itemId, categoryName, EvaluationScores, URL_NO, lastPage
+            updateCustomItemDetailTB(itemData['ItemID'], str(itemData['ItemName']),str(itemData['TreasureID']),detailContent, 'productEnd')
     except Exception as e:
         print ('errorMISS---%s' % e)
 
