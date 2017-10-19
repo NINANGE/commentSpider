@@ -265,7 +265,9 @@ def provideSource(html,itemData,data):
         updateCustomItemDetailTB(itemData['ItemID'], str(itemData['ItemName']),str(itemData['TreasureID']),detailContent,'HaveInHand')
 
         lastPage = getLastPage(str(itemId), str(spuId), str(sellerId))
-
+        if lastPage==0:
+            updateCustomItemDetailTB(itemData['ItemID'], str(itemData['ItemName']), str(itemData['TreasureID']),detailContent, 'productEnd')
+            
         print brand, brandId, categoryId, rootCatId, spuId, title, shopID, StyleName, shopName, itemId, categoryName, EvaluationScores, URL_NO, lastPage
         for page in range(1, lastPage + 1):
             print '第%s次' % page
