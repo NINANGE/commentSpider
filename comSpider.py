@@ -34,8 +34,9 @@ sys.setdefaultencoding('utf-8')
 url = 'https://v2-api.jsdama.com/upload'
 
 
-client = pymongo.MongoClient('192.168.3.172',27017)
+# client = pymongo.MongoClient('192.168.3.172',27017)
 # client = pymongo.MongoClient('127.0.0.1',27017)
+client = pymongo.MongoClient('192.168.2.5',27017)
 db = client.CommentDB
 commentContentTB = db.commentContentTB
 tableProject = db.commProjectTB
